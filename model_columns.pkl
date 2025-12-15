@@ -1,0 +1,8 @@
+features = [
+    "area_m2",
+    "duration_months",
+    "workers",
+    "workers_per_100m2",
+    "area_per_month",
+    "area_per_worker"
+]
