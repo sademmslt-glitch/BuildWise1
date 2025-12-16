@@ -49,8 +49,11 @@ ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "buildwise123")
 # =================================
 if page == "User":
 
-    st.title("BuildWise")
-    st.caption("Clear insights to plan your construction project with confidence.")
+st.title("BuildWise")
+st.caption("AI-powered planning assistant that estimates cost and predicts delay risk before execution.")
+
+st.subheader("🧱 Project Setup")
+st.write("Fill the project details to get an instant risk-aware estimate.")
 
     project_type = st.selectbox("Project Type", PROJECT_TYPES)
     project_size = st.selectbox("Project Size", PROJECT_SIZES)
@@ -90,7 +93,7 @@ if page == "User":
         })
 
         # ---------------- Results ----------------
-        st.subheader("Project Results")
+        st.subheader("📊 AI Prediction Results")
 
         st.metric(
             "Estimated Cost (SAR)",
@@ -101,8 +104,10 @@ if page == "User":
         st.caption(f"Expected Cost Range: **{cost_low:,.0f} – {cost_high:,.0f} SAR**")
 
         st.metric(
-            "Delay Probability",
-            f"{result['delay_probability']}%"
+    "Risk of Delay",
+    f"{result['delay_probability']}%",
+    help="Estimated likelihood of schedule overrun based on workload pressure and learned patterns."
+)
         )
 
         if result["risk_level"] == "Low":
@@ -112,9 +117,10 @@ if page == "User":
         else:
             st.error("🔴 High Delay Risk")
 
-        st.subheader("What you can do")
-        for rec in result["recommendations"]:
-            st.write(f"• {rec}")
+        st.subheader("⚠️ Decision Support")
+for rec in result["recommendations"]:
+    st.write(f"✅ {rec}")
+            st.info("This prediction is intended for planning stage decision-making and may vary with on-site conditions.")
 
 # =================================
 # ADMIN PAGE
