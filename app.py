@@ -49,11 +49,13 @@ ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "buildwise123")
 # =================================
 if page == "User":
 
-st.title("BuildWise")
-st.caption("AI-powered planning assistant that estimates cost and predicts delay risk before execution.")
+    st.title("BuildWise")
+    st.caption(
+        "AI-powered planning assistant that estimates cost and predicts delay risk before execution."
+    )
 
-st.subheader("🧱 Project Setup")
-st.write("Fill the project details to get an instant risk-aware estimate.")
+    st.subheader("🧱 Project Setup")
+    st.write("Fill the project details to get an instant risk-aware estimate.")
 
     project_type = st.selectbox("Project Type", PROJECT_TYPES)
     project_size = st.selectbox("Project Size", PROJECT_SIZES)
@@ -72,14 +74,11 @@ st.write("Fill the project details to get an instant risk-aware estimate.")
                 workers
             )
 
-        # ---------------- Cost Range (X to Y) ----------------
-        # تقدير نطاق بسيط حول التكلفة (±10%)
         cost = float(result["estimated_cost"])
-        margin = 0.10  # تقدرين تغيرينه إلى 0.08 أو 0.12 حسب رغبتك
+        margin = 0.10
         cost_low = cost * (1 - margin)
         cost_high = cost * (1 + margin)
 
-        # Save predicted project (for Admin analysis)
         st.session_state.predicted_projects.append({
             "Project Type": project_type,
             "Project Size": project_size,
@@ -92,22 +91,18 @@ st.write("Fill the project details to get an instant risk-aware estimate.")
             "Risk Level": result["risk_level"]
         })
 
-        # ---------------- Results ----------------
+        # ---------- Results ----------
         st.subheader("📊 AI Prediction Results")
 
-        st.metric(
-            "Estimated Cost (SAR)",
-            f"{cost:,.0f}"
+        st.metric("Estimated Cost (SAR)", f"{cost:,.0f}")
+        st.caption(
+            f"Expected Cost Range: **{cost_low:,.0f} – {cost_high:,.0f} SAR**"
         )
 
-        # ✅ NEW: show cost range
-        st.caption(f"Expected Cost Range: **{cost_low:,.0f} – {cost_high:,.0f} SAR**")
-
         st.metric(
-    "Risk of Delay",
-    f"{result['delay_probability']}%",
-    help="Estimated likelihood of schedule overrun based on workload pressure and learned patterns."
-)
+            "Risk of Delay",
+            f"{result['delay_probability']}%",
+            help="Estimated likelihood of schedule overrun based on workload pressure and learned patterns."
         )
 
         if result["risk_level"] == "Low":
@@ -118,9 +113,13 @@ st.write("Fill the project details to get an instant risk-aware estimate.")
             st.error("🔴 High Delay Risk")
 
         st.subheader("⚠️ Decision Support")
-for rec in result["recommendations"]:
-    st.write(f"✅ {rec}")
-            st.info("This prediction is intended for planning stage decision-making and may vary with on-site conditions.")
+        for rec in result["recommendations"]:
+            st.write(f"✅ {rec}")
+
+        st.info(
+            "This prediction is intended for planning stage decision-making "
+            "and may vary with on-site conditions."
+        )
 
 # =================================
 # ADMIN PAGE
@@ -137,15 +136,11 @@ else:
 
     st.success("Welcome, Admin")
 
-    # ---------------------------------
-    # ANALYTICAL TABLE (Predictions)
-    # ---------------------------------
     st.subheader("📊 Predicted Projects Analysis")
 
     if st.session_state.predicted_projects:
         df_pred = pd.DataFrame(st.session_state.predicted_projects)
 
-        # Overview Metrics
         total = len(df_pred)
         high = len(df_pred[df_pred["Risk Level"] == "High"])
         medium = len(df_pred[df_pred["Risk Level"] == "Medium"])
@@ -157,15 +152,10 @@ else:
         c3.metric("Medium Risk", medium)
         c4.metric("Low Risk", low)
 
-        # ✅ الجدول التحليلي يشمل Cost Range
         st.dataframe(df_pred, use_container_width=True)
-
     else:
         st.info("No predicted projects yet.")
 
-    # ---------------------------------
-    # COMPANY PROJECTS (ADMIN INPUT)
-    # ---------------------------------
     st.subheader("🏢 Company Projects (Administrative)")
 
     if st.session_state.company_projects:
@@ -174,9 +164,6 @@ else:
     else:
         st.info("No company projects added yet.")
 
-    # ---------------------------------
-    # ADD COMPANY PROJECT FORM
-    # ---------------------------------
     st.subheader("➕ Add Company Project")
 
     with st.form("add_company_project"):
@@ -184,7 +171,6 @@ else:
         p_area = st.number_input("Area (m²)", 50, 200000, 300, step=50)
         p_duration = st.number_input("Duration (months)", 0.5, 60.0, 3.0, step=0.5)
         p_workers = st.number_input("Workers", 1, 500, 10)
-
         p_cost = st.number_input(
             "Estimated Budget (SAR)",
             min_value=0,
