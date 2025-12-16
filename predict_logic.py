@@ -35,64 +35,63 @@ def classify_risk(delay_prob):
 # =================================================
 # FRIENDLY & CONSISTENT RECOMMENDATIONS
 # =================================================
+
 def generate_recommendations(area, workers, duration, risk):
     recs = []
 
-    ideal_workers = max(5, int(area / 40))
-    ideal_duration = max(1.5, area / 120)
+    # حساب القيم المناسبة
+    rec_workers_min = int(area / 45)
+    rec_workers_max = int(area / 35)
 
-    # توصيات أساسية (تظهر دائمًا)
-    recs.append(
-        "متابعة تقدم المشروع بشكل منتظم تساعد على اكتشاف أي تأخير في وقت مبكر."
-    )
+    rec_duration_min = round(area / 130, 1)
+    rec_duration_max = round(area / 100, 1)
 
-    recs.append(
-        "تنظيم المهام وتحديد أولويات التنفيذ يساهم في سير العمل بسلاسة."
-    )
+    workers_low = workers < rec_workers_min
+    duration_low = duration < rec_duration_min
 
-    # توصيات حسب مستوى الخطر
     if risk == "High":
-        recs.append(
-            "مؤشرات المشروع الحالية تدل على ضغط مرتفع، ويُنصح باتخاذ إجراءات وقائية."
-        )
 
-        if workers < ideal_workers:
+        if workers_low and duration_low:
             recs.append(
-                f"عدد العمال قد يكون أقل من المطلوب. "
-                f"زيادة العدد ليقترب من {ideal_workers} عامل قد تقلل من ضغط التنفيذ."
+                f"المشروع معرض للتأخير بسبب قلة العمال ({workers}) وقصر المدة ({duration} أشهر). "
+                f"يُفضّل رفع عدد العمال إلى {rec_workers_min}–{rec_workers_max} "
+                f"وزيادة المدة إلى {rec_duration_min}–{rec_duration_max} أشهر."
             )
 
-        if duration < ideal_duration:
+        elif workers_low:
             recs.append(
-                f"مدة المشروع تبدو قصيرة نسبيًا. "
-                f"تمديدها إلى حوالي {round(ideal_duration,1)} أشهر قد يساعد في تقليل مخاطر التأخير."
+                f"سبب التأخير المحتمل هو قلة عدد العمال ({workers}). "
+                f"يُفضّل زيادتهم ليكونوا بين {rec_workers_min} و {rec_workers_max} عامل."
             )
 
-        recs.append(
-            "تجهيز المواد والموافقات الأساسية مبكرًا يساعد على تجنب التوقفات المفاجئة."
-        )
+        elif duration_low:
+            recs.append(
+                f"مدة المشروع ({duration} أشهر) قصيرة مقارنة بحجمه. "
+                f"زيادة المدة إلى {rec_duration_min}–{rec_duration_max} أشهر قد تقلل التأخير."
+            )
 
     elif risk == "Medium":
-        recs.append(
-            "مستوى الخطر متوسط، والمشروع قابل للإدارة مع متابعة جيدة."
-        )
 
-        if workers < ideal_workers:
+        if workers_low:
             recs.append(
-                "في حال ظهور ضغط في بعض المراحل، دعم الفريق بعدد إضافي من العمال قد يكون مفيدًا."
+                f"الخطر متوسط بسبب أن عدد العمال ({workers}) أقل من المناسب. "
+                f"زيادة بسيطة في العمال قد تحسن الالتزام بالجدول."
             )
 
-        recs.append(
-            "الاحتفاظ بخطة بديلة يضيف مرونة في حال حدوث تغييرات غير متوقعة."
-        )
+        elif duration_low:
+            recs.append(
+                f"الخطر متوسط لأن مدة المشروع قريبة من الحد الأدنى. "
+                f"تمديد المدة قليلًا قد يعطي مرونة أفضل."
+            )
 
-    else:  # Low risk
-        recs.append(
-            "الخطة الحالية متوازنة وتبدو مستقرة."
-        )
+        else:
+            recs.append(
+                "الخطر متوسط بسبب ضغط العمل، مع أن الوضع الحالي قابل للإدارة."
+            )
 
+    else:
         recs.append(
-            "الاستمرار بنفس أسلوب العمل مع مراجعة دورية كافٍ للحفاظ على الأداء الجيد."
+            "عدد العمال ومدة المشروع مناسبين لحجم العمل، ولا يظهر خطر تأخير واضح."
         )
 
     return recs
