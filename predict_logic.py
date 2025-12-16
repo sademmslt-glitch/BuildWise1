@@ -33,83 +33,77 @@ def classify_risk(delay_prob):
         return "High"
 
 # =================================================
-# SMART & SIMPLE RECOMMENDATIONS
+# SMART, SHORT & DATA-BASED RECOMMENDATIONS
 # =================================================
 def generate_recommendations(area, workers, duration, risk):
     recs = []
 
-    # قيم مرجعية بسيطة وواضحة
-    ideal_workers = area / 40
-    ideal_duration = area / 120
+    # تقدير منطقي تقريبي
+    ideal_workers = area / 40          # عامل لكل ~40 م²
+    ideal_duration = area / 120        # شهر لكل ~120 م²
 
-    workers_gap = round(ideal_workers - workers)
+    workers_gap = int(round(ideal_workers - workers))
     duration_gap = round(ideal_duration - duration, 1)
 
-    # -------------------------------
-    # HIGH RISK
-    # -------------------------------
+    # ---------------- HIGH RISK ----------------
     if risk == "High":
 
         if workers_gap > 0 and duration_gap > 0:
             recs.append(
                 f"الخطر مرتفع لأن عدد العمال ({workers}) والمدة ({duration} أشهر) أقل من المناسب لحجم المشروع. "
-                f"يُفضّل زيادة عدد العمال بحوالي {workers_gap + 2} عمال "
-                f"وزيادة المدة بنحو {round(duration_gap + 1,1)} أشهر لتقليل احتمال التأخير."
+                f"يُفضّل زيادة العمال إلى حوالي {workers + workers_gap + 1} "
+                f"وتمديد المدة إلى نحو {round(duration + duration_gap + 0.5,1)} أشهر."
             )
 
         elif workers_gap > 0:
             recs.append(
-                f"الخطر مرتفع بسبب قلة عدد العمال مقارنة بحجم المشروع. "
-                f"زيادة عدد العمال بحوالي {workers_gap + 2} قد تحسّن الالتزام بالجدول."
+                f"الخطر مرتفع بسبب قلة عدد العمال ({workers}). "
+                f"زيادة العمال إلى حوالي {workers + workers_gap + 1} قد تقلل احتمال التأخير."
             )
 
         elif duration_gap > 0:
             recs.append(
-                f"الخطر مرتفع لأن مدة التنفيذ ({duration} أشهر) قصيرة نسبيًا. "
-                f"تمديد المدة بحوالي {round(duration_gap + 1,1)} أشهر قد يقلل التأخير."
+                f"الخطر مرتفع لأن مدة التنفيذ ({duration} أشهر) قصيرة. "
+                f"تمديد المدة إلى نحو {round(duration + duration_gap + 0.5,1)} أشهر قد يحسّن الالتزام بالجدول."
             )
 
         else:
             recs.append(
                 "الخطر مرتفع بسبب ضغط عام في تنفيذ المشروع، "
-                "وتعديل بسيط في الموارد أو المدة قد يساعد على تقليل المخاطر."
+                "ويُفضّل تعزيز الموارد أو الجدول لتقليل المخاطرة."
             )
 
-    # -------------------------------
-    # MEDIUM RISK
-    # -------------------------------
+    # ---------------- MEDIUM RISK ----------------
     elif risk == "Medium":
 
         if workers_gap > 0:
             recs.append(
-                f"الخطر متوسط لأن عدد العمال قريب من الحد الأدنى. "
-                f"إضافة عامل أو عاملين قد تخفّض مستوى الخطر."
+                f"الخطر متوسط لأن عدد العمال ({workers}) قريب من الحد الأدنى. "
+                f"إضافة عامل واحد قد يخفض مستوى الخطر."
             )
 
         elif duration_gap > 0:
             recs.append(
-                f"الخطر متوسط لأن مدة المشروع ({duration} أشهر) ضيقة نسبيًا. "
-                f"تمديد المدة بنحو نصف شهر إلى شهر قد يقلل احتمال التأخير."
+                f"الخطر متوسط لأن المدة ({duration} أشهر) ضيقة نسبيًا. "
+                f"تمديد المدة بنحو نصف شهر إلى شهر قد يجعل الخطة أكثر أمانًا."
             )
 
         else:
             recs.append(
-                "الخطر متوسط بسبب توازن محدود بين المدة وعدد العمال. "
-                "تحسين بسيط في أيٍ منهما قد يجعل الخطة أكثر استقرارًا."
+                "الخطر متوسط لأن التوازن بين المدة وعدد العمال دقيق. "
+                "أي تعديل بسيط في أحدهما قد يقلل احتمال التأخير."
             )
 
-    # -------------------------------
-    # LOW RISK
-    # -------------------------------
+    # ---------------- LOW RISK ----------------
     else:
         recs.append(
-            "الخطة الحالية متوازنة، ولا يظهر خطر تأخير بناءً على البيانات المدخلة."
+            "الخطة الحالية متوازنة ولا يظهر خطر تأخير بناءً على البيانات المدخلة."
         )
 
     return recs
 
 # =================================================
-# FALLBACK LOGIC (بدون ML)
+# FALLBACK LOGIC (NO ML)
 # =================================================
 def rule_based_cost(area, project_size):
     base_rate = 1200
@@ -118,7 +112,6 @@ def rule_based_cost(area, project_size):
 
 def rule_based_delay(area, workers, duration):
     pressure = calculate_pressure(area, workers, duration)
-
     if pressure > 12:
         return 65
     elif pressure > 8:
